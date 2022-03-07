@@ -6,10 +6,10 @@ Build a digital currency system without any central authority.
 - Block Chain: each block contains hash of the previous block, a nonce, some transactions. 
 - Proof of Work: Sign a block by finding a nonce to make the hash of the block have some leading zeros.
 - Concensus: always accept the longest block chain. Because the majority of CPU power generates block faster.
-- Privaty: The owner of the public key is anonymous.  
-- Extra Privace: Generate a new key pair for each transaction.
+- Privacy: The owner of the public key is anonymous.  
+- Extra Privacy: Generate a new key pair for each transaction.
 - Combine/Split Value of a Coin: a transaction contain multiple input/output. Multiple input combine value, multiple output split value.
-- Incentive: Each block contains a transaction to the block creator.(the coin may come from transaction fee or newly issue coins per block)
+- Incentive: Each block contains a transaction to the block creator.(the coin may come from transaction fee or newly issued coins per block)
 
 # Engineering Tricks
-- Each block uses a merkle tree for hashing. Discards node without affecting the hash.
+- Each block uses a merkle tree for hashing. Discard nodes without affecting the hash.
