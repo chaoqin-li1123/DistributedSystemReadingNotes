@@ -1,0 +1,15 @@
+Problem to solve:
+A high throughput and fault tolerant message queue that supports both real time event streaming and batch processing.
+Cache: read from and write to files directly, doesn't maintain in process cache.
+- File system have page cache, read-ahead and write-behind makes sequential read/write efficient.
+- Java objects have memory space and GC overhead.
+- Unlike in process cache, os level page cache stays warm even after process restarts.
+Each queue is an append only file, sequential read and write have constant overhead. Reads/ writes are non-blocking.
+
+Batch messages into "message set": larger network packets, continuous memory chunks, larger sequential write.
+Zero copy: sendfile, send from file system to network interface without copying into user space.
+
+Producer push to Broker and consumer pull from broker.
+
+Producer: 
+
