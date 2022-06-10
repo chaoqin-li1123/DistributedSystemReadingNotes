@@ -1,15 +1,40 @@
 Problem to solve:
 A high throughput and fault tolerant message queue that supports both real time event streaming and batch processing.
+
 Cache: read from and write to files directly, doesn't maintain in process cache.
 - File system have page cache, read-ahead and write-behind makes sequential read/write efficient.
 - Java objects have memory space and GC overhead.
 - Unlike in process cache, os level page cache stays warm even after process restarts.
+
 Each queue is an append only file, sequential read and write have constant overhead. Reads/ writes are non-blocking.
 
-Batch messages into "message set": larger network packets, continuous memory chunks, larger sequential write.
-Zero copy: sendfile, send from file system to network interface without copying into user space.
+Batch messages into "message set": larger network packets, continuous memory chunks, larger sequential write. Batch bound by both batch size and latency.
+Zero copy: sendfile, send from file system to network interface without copying into user process space.
 
 Producer push to Broker and consumer pull from broker.
 
 Producer: 
+Request metadata of broker partitions from any Kafka nodes, publish message to any partition of the topic. 
+The producer specify its own load balancing algorithm. Hash by key can make sure that messages of the same key are sent to the same partition.
 
+Consumer:
+Use "long poll" pull request mode to avoid busy waiting.
+Consumer state: each partition is a totally ordered queue, only need to keep track of the index of the last consumed message.
+
+Message Delivery Semantics Guarantee
+From producer perspective:
+- At most once. Disable retries.
+- At least once. resend the message if the producer didn't receive an ACK.
+- Exactly once(idempotent producer). Assign each producer an ID and deduplicate message with producer id and message sequence number
+
+From consumer perspective:
+- At most once. Update the position, then process the messages. Skip some messages if crash before processing finish.
+- At least once. Process the messages, then update the position. Process more than once if crash before position is updated.
+
+Replication
+Liveness(in sync): alive node that maintain its session with ZooKeeper. For a follower, it can't be too far behind the leader.
+Message is commited if all in-sync replicas have applied the log.(can configure the minimum number of in sync nodes to commit the message)
+Compared with quorum: Smaller number of nodes.(pros) Need to wait for slowest writer.(cons)
+Failure recovery: 
+1. wait for a in sync node to come back alive, don't lose any commited message. Better consistency.
+2. wait for any node to come back alive. Higher availability.
