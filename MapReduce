@@ -1,0 +1,25 @@
+A distributed computation framework.
+
+Programming Model
+map: (k1, v1) -> list(k2, v2)
+reduce: k2, iterator v2 -> k2, list(v3) (use iterator here because values may not fit into memory)
+
+Workflow(M map tasks, R reduce tasks)
+1. Partition input file into M pieces. Each input split assigned to a worker, a map task create R result files in local disk(partitioned by intermediate key space)
+2. Optionally combine values for intermediate key after a map task to reduce storage and bandwidth.
+3. A reduce task is notified of the locations of all result files of its key partition, read those files and sort by intermediate key.
+4. Reduce task apply reduce on each intermediate key and write output to final result file in a distributed file system.(a output file per output task)
+
+Metadata in Master
+task | state(IDLE, IN-PROGRESS, COMPLETED) | assigned machine | intermediate file or result file
+
+Fault Tolerance
+Worker failure: Master health check worker. For any failed worker, reset map tasks state(complete and incomplete) to be idle and rerun, 
+reset incomplete reduce task to be idle and rerun. Because map result is on local disks while reduce result is on distributed file system.
+Master failure should be rare since there is only 1 master, in that case, simply resubmit job to a healthy master.
+
+Locality
+Try to schedule map tasks in worker machines close to the input file.
+
+Task Granularity
+Configure M such that each input file piece is roughly 16-64MB. Makes R a small multiple of the number of machines.
