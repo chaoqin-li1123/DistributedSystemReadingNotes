@@ -1,0 +1,24 @@
+Why(what is the problem they try to solve):
+Fault tolerant data reusing in distributed computing application.
+Previous distributed computing framework doesn't have a general and efficient mechanism for reusing intermediate result. 
+They share data by writing to external storage or in patterns designed for specific workload.
+Data reusing is important for iterative algorithm and interative application.
+
+How they solve the problem
+Resilient Distributed Dataset(RDD): 
+1.An RDD is loaded from external data source or transformed by another RDD.
+2.RDD is stored in memory but can be persisted to disk. Persistence and partition policy can be configured.
+  RDDs are evaluated lazily and not cached by default.(exception: intermediate results in shuffle operation because shuffle is expensive)
+  Persistence options: in memory deserialized storage, in memory serialized storage, on disk. 
+  Partition: 
+  Narrow partition means a parent partition has at most 1 child partiton, wide partition means a parent partition has multiple child partitions.
+  Narrow partition is good because:
+    Avoid shuffling and enable pipelined execution(combine, map and filter).
+    More efficient fault recovery since a partition failure doesn't require a complete re-execution.
+3.RDDs are immutable and only support corse grained transformation.
+  A RDD is represented as: dependency(parent RDDs and transformation), partition policy, data placement policy
+  Robust fault recovery: recompute RDD partitions using lineage graphs.
+4.Task scheduler: build a DAG of stages. 
+  Boundries of stages are shuffle operation(which means pipelined operations are compressed) or persisted partitions.
+  Assign tasks based on data locality.
+5.Memory management: each node has its own memory pool, RDD evicted with LRU policy.
