@@ -1,0 +1,17 @@
+Problem to solve
+A fault tolerant, consistent and versatile system for streaming processing.
+
+Computation model: An injector bring records to the system. Each computation subscribe or publish to a topic.
+When a new record comes or timer fires, invoke the user defined callback. Records are processed in timestamp order for each key.
+
+Watermark: The injector seed the watermark because it has knowledge of incoming records, watermark is defined recursively,
+
+State consistency: each key interval has 1 interval, which is enforced by lease. 
+The state change(timer, user defined state, produced records) by a callback is atomic.
+
+Exactly Once Delivery(Idempotency)
+Upstream retry sending records until it gets an ACK. 
+Receiver deduplicate records with their uuid. Since record duplicate is the uncommon case, use a bloom filter to filter out records haven't been received. 
+Records that match the bloom filter require lookup of the persistent state. Record history needs to be garbage collected.
+
+Load balance : a replicated master assign, reassign, split or merge key intervals.
