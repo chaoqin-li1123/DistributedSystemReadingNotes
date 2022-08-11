@@ -1,0 +1,23 @@
+The Problem to Solve
+In a BSP micro-batch streaming system, for each batch, communiation between centralized driver and executors is required for scheduling and stage barrier coordination.
+This overhead limit the number of batch per time unit and therefore the latency of the streaming system.
+
+Solution
+Decouple data plane and control plane latency by reusing scheduling decision across batches and remove coordination by driver within a batch.
+Group scheduling:  Reuse scheduling decision based on observation that compute resources and data pattern change slowly.
+1 data source don't change, so locality don't change,
+2 cluser don't change, so compute resources don't change
+Group Size Auto-tuning Algorithm: 
+overhead = time_spent_in_scheduling / time_spent_in_data_processing
+When overhead is greater than the upper bound, increase group size multiplicatively to decrease the overhead rapidly and handle spikes.
+When overhead is lower that the lower bound, additively decrease the group size to improve adaptivity.
+
+
+Pre-scheduling: 
+The central driver push the data dependency of a task to each machine. Executors pull data directly from the tasks they depend on. 
+Upon a pull failure, let the central scheduler resubmit the task to handle the failure.
+
+Why micro-batch is good?
+Optimization inside a batch: vectorization; partial combine to minimize network traffic
+Optimization across batches: collect query execution stats for future query plan optimization
+
