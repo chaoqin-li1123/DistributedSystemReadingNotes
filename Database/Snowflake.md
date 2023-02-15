@@ -34,3 +34,6 @@ A cloud native database: use cloud object store as storage and EC instances as c
     * OLAP workload, mostly bulk read, insert, update
  7. Security. Hierachical key model: root key, accout key, table key, file key. Key rotation and rekeying in the background. Role based access control.
     
+ # Benchmark
+ 1. Workload: structured and unstructured TPC-H like data.
+ 2. Cluster setup / resources: medium standard warehouse.
